@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Pie } from 'react-chartjs-2';
 
 function App() {
   const [expenses, setExpenses] = useState([]);
@@ -47,6 +48,41 @@ function App() {
 
   const handleMaxExpenseChange = async () => {
     await axios.put('http://localhost:5001/api/maxMonthlyExpense', { maxExpense: maxMonthlyExpense });
+  };
+
+  // Calculate the percentage of each expense in the total monthly expense
+  const calculateExpensePercentage = () => {
+    const totalExpense = expenses.reduce((total, expense) => total + expense.amount, 0);
+    return expenses.map((expense) => ((expense.amount / totalExpense) * 100).toFixed(2));
+  };
+
+  const expensePercentages = calculateExpensePercentage();
+
+  const pieChartData = {
+    labels: expenses.map((expense) => expense.description),
+    datasets: [
+      {
+        data: expensePercentages,
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#5AD3D1',
+          '#FF9F40',
+          '#C3B1E1',
+          '#E670AE',
+        ],
+        hoverBackgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#5AD3D1',
+          '#FF9F40',
+          '#C3B1E1',
+          '#E670AE',
+        ],
+      },
+    ],
   };
 
   return (
@@ -106,6 +142,11 @@ function App() {
           </li>
         ))}
       </ul>
+      <h2>Expense Percentage Breakdown</h2>
+      <div style={{ maxWidth: '500px', margin: '0 auto' }} >
+      <Pie data={pieChartData} />
+      </div>
+     
     </div>
   );
 }
